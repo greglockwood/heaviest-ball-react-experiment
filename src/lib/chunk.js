@@ -1,8 +1,6 @@
 // @flow
 
-function range(size: number): Array {
-    return new Array(size).fill(1).map((_, i) => i);
-}
+import range from './range';
 
 function buildChunk(array: Array<any>, size: number, startIndex, fillWithUndefined: boolean): Array<any> {
     return fillWithUndefined
@@ -15,8 +13,9 @@ export default function chunk(array: Array<any>, size: number, fillWithUndefined
         return [...buildChunk(array, size, 0, fillWithUndefined)];
     }
     const newArr = [];
-    for (let i = 0; i < array.length; i+= size) {
-        newArr.push(buildChunk(array, size, i, fillWithUndefined));
+    const maxChunkSize = Math.ceil(array.length / size);
+    for (let i = 0; i < array.length; i+= maxChunkSize) {
+        newArr.push(buildChunk(array, maxChunkSize, i, fillWithUndefined));
     }
     return newArr;
 }

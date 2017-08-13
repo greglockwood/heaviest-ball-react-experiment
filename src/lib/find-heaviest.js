@@ -2,6 +2,7 @@
 
 import compare from './compare';
 import chunk from './chunk';
+import range from './range';
 
 function compareWeights(a, b) {
     return compare(a, b, weightValue);
@@ -19,23 +20,28 @@ function size(x):number {
     return Array.isArray(x) ? x.length : 1;
 }
 
-function heaviest(a, b, c, startPos = 0, weighs = 0):{ pos: number, weighs: number } {
+function castArray(x): Array {
+    return Array.isArray(x) ? x : [x];
+}
+
+function heaviest(array, a, b, c, startPos = 0, steps = []):{ heaviest: number, steps: Array } {
     const cmp = compareWeights(a, b);
     const result = (val, relPos) => {
         const sz = size(val);
-        const pos = startPos + ((relPos - 1) * sz);
+        const pos = startPos + (relPos * sz);
+        const step = { left: range(startPos, startPos + size(a) - 1), right: range(startPos + sz, startPos + sz + size(b) - 1), balance: cmp};
         return sz === 1
-            ? {pos: startPos + relPos, weighs: weighs + 1}
-            : heaviest(...chunk(val, 3), pos, weighs + 1);
+            ? {heaviest: startPos + relPos, steps: [...steps, step]}
+            : heaviest(array, ...chunk(val, 3), pos, [...steps, step]);
     };
     if (cmp === 0) {
-        return result(c, 3);
+        return result(c, 2);
     } else if (cmp < 0) {
-        return result(a, 1);
+        return result(a, 0);
     }
-    return result(b, 2);
+    return result(b, 1);
 }
 
 export default function findHeaviest(weights: Array<number>):{ pos: number, weighs: number } {
-    return heaviest(...chunk(weights, 3));
+    return heaviest(weights, ...chunk(weights, 3));
 }
